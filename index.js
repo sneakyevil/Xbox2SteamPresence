@@ -105,11 +105,6 @@ SteamClient.on("error", function(error)
 	console.log("[ ERROR ]", error);
 });
 
-SteamClient.on("updateMachineAuth", function(sentry, cb)
-{
-    FS.writeFileSync("./sentry.bin", sentry.bytes);
-});
-
 // Xbox Client
 XboxClient.OnAuth = async function()
 {
