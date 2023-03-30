@@ -1,0 +1,12 @@
+{
+    "name": "Xbox2SteamPresence",
+    "version": "1.0.0",
+    "description": "Shows Xbox user presence as playing game info on steam.",
+    "main": "index.js",
+    "author": "sneakyevil",
+    "license": "ISC",
+    "dependencies": {
+      "steam-user": "^4.28.0",
+      "xbox-webapi": "^1.4.1"
+    }
+  }

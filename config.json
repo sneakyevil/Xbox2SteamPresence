@@ -1,0 +1,14 @@
+{
+    "Steam":
+    {
+        "AccountName": "your_steam_login_name",
+        "AccountPassword": "your_steam_login_password"
+    },
+    "XboxAPI":
+    {
+        "clientId": "your_azure_client_id",
+        "clientSecret": "your_azure_client_secret",
+        "deviceId": 0
+    },
+    "UpdateDelay": 1
+}
