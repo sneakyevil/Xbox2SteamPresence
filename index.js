@@ -79,6 +79,7 @@ async function OnUpdate()
 	    SteamClient.gamesPlayed();
         
         XboxClient.LastTitleID = -1;
+        console.log("[ STEAM ] No presence found, going offline...");
     }
 
     // We delay update by 1 more minute if title is same so we save some API requests...
