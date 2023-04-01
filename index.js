@@ -1,5 +1,3 @@
-const FS = require("fs");
-
 const SteamUser = require("steam-user");
 const XboxWebAPI = require("xbox-webapi");
 const Config = require("./config.json");
@@ -114,7 +112,8 @@ XboxClient.OnAuth = async function()
         "accountName": Config.Steam.AccountName, 
         "password": Config.Steam.AccountPassword, 
         "rememberPassword": true,
-        "machineName": "XboxPresence"
+        "machineName": "XboxPresence",
+        "logonID": Config.Steam.LogonID // Prevent LogonSessionReplaced
     });
 }
 
@@ -131,6 +130,7 @@ XboxClient.GetPresence = async function()
     }
 }
 
+XboxClient.RefreshTokenFailNum = 0;
 XboxClient.RefreshToken = async function()
 {
     try
@@ -138,10 +138,15 @@ XboxClient.RefreshToken = async function()
         let m_OAuth = await XboxClient._authentication.refreshToken(XboxClient._authentication._tokens.oauth.refresh_token);
         XboxClient._authentication._tokens.oauth = m_OAuth;
         XboxClient._authentication.saveTokens();
+
+        RefreshTokenFailNum = 0;
     }
     catch (error)
     {
-        console.log("[ ERROR ] Couldn't refresh token...");
+        ++RefreshTokenFailNum;
+
+        if (RefreshTokenFailNum >= 30)
+            console.log("[ ERROR ] Couldn't refresh token...");
     }
 }
 
