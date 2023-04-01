@@ -1,6 +1,7 @@
 const SteamUser = require("steam-user");
 const XboxWebAPI = require("xbox-webapi");
 const Config = require("./config.json");
+const CustomTitles = require("./customtitles.json");
 
 // Main
 var SteamClient = new SteamUser({ "dataDirectory": "./SteamData/", "singleSentryfile": true });
@@ -37,25 +38,42 @@ async function OnUpdate()
         {
             let m_TitleName = m_Titles[m_TitleIndex].name;
             let m_AppID = -1;
-            let m_NameMatchCount = 0;
 
-            // Attempt to find AppID by name...
-            for (var i = 0; SteamClient.Apps.length > i; ++i)
+            let m_HasCustomTitle = false;
+            for (var i = 0; CustomTitles.length > i; ++i)
             {
-                let m_App = SteamClient.Apps[i];
-                if (m_TitleName.indexOf(m_App.name) == -1)
-                    continue;
-
-                // Check how many chars are matching...
-                for (var c = 0; m_TitleName.length > c && m_App.name.length > c; ++c)
+                if (CustomTitles[i].TitleID == m_TitleID)
                 {
-                    if (m_TitleName[c] != m_App.name[c])
-                        break;
+                    m_TitleName = CustomTitles[i].Name;
+                    m_AppID = CustomTitles[i].AppID;
 
-                    if (c > m_NameMatchCount)
+                    m_HasCustomTitle = true;
+                    break;
+                }
+            }
+
+             // Attempt to find AppID by name...
+            if (!m_HasCustomTitle)
+            {
+                let m_NameMatchCount = 0;
+
+                for (var i = 0; SteamClient.Apps.length > i; ++i)
+                {
+                    let m_App = SteamClient.Apps[i];
+                    if (m_TitleName.indexOf(m_App.name) == -1)
+                        continue;
+
+                    // Check how many chars are matching...
+                    for (var c = 0; m_TitleName.length > c && m_App.name.length > c; ++c)
                     {
-                        m_AppID = m_App.appid;
-                        m_NameMatchCount = c;
+                        if (m_TitleName[c] != m_App.name[c])
+                            break;
+
+                        if (c > m_NameMatchCount)
+                        {
+                            m_AppID = m_App.appid;
+                            m_NameMatchCount = c;
+                        }
                     }
                 }
             }
@@ -63,12 +81,17 @@ async function OnUpdate()
 	        SteamClient.setPersona(SteamUser.EPersonaState.Online);
             
             if (m_AppID == -1)
-	            SteamClient.gamesPlayed("Xbox: " + m_TitleName);
+            {
+	            SteamClient.gamesPlayed("Xbox: " + m_TitleName);          
+                console.log("[ STEAM ] Setting title to: " + m_TitleName + " (" + m_TitleID + ")");
+            }
             else
-                SteamClient.gamesPlayed(m_AppID);
+            {
+                SteamClient.gamesPlayed(m_AppID);  
+                console.log("[ STEAM ] Setting appID to: " + m_AppID);
+            }
 
             XboxClient.LastTitleID = m_TitleID;
-            console.log("[ STEAM ] Title set to:", m_TitleName);
         }
     }
     else if (XboxClient.LastTitleID != -1) // Couldn't find presence/device - could be offline or we set wrong deviceid...
