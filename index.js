@@ -139,13 +139,13 @@ XboxClient.RefreshToken = async function()
         XboxClient._authentication._tokens.oauth = m_OAuth;
         XboxClient._authentication.saveTokens();
 
-        RefreshTokenFailNum = 0;
+        XboxClient.RefreshTokenFailNum = 0;
     }
     catch (error)
     {
-        ++RefreshTokenFailNum;
+        ++XboxClient.RefreshTokenFailNum;
 
-        if (RefreshTokenFailNum >= 30)
+        if (XboxClient.RefreshTokenFailNum >= 30)
             console.log("[ ERROR ] Couldn't refresh token...");
     }
 }
