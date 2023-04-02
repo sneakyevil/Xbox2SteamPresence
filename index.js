@@ -12,7 +12,7 @@ XboxClient.LastTitleID = -1;
 
 async function OnUpdate()
 {
-    let m_IsSameTitleID = false;
+    let m_DelayUpdate = false;
 
     await XboxClient.RefreshToken();
     let m_Presence = await XboxClient.GetPresence();
@@ -33,7 +33,7 @@ async function OnUpdate()
 
         let m_TitleID = parseInt(m_Titles[m_TitleIndex].id);
         if (m_TitleID == XboxClient.LastTitleID)
-            m_IsSameTitleID = true;
+            m_DelayUpdate = true;
         else
         {
             let m_TitleName = m_Titles[m_TitleIndex].name;
@@ -94,17 +94,21 @@ async function OnUpdate()
             XboxClient.LastTitleID = m_TitleID;
         }
     }
-    else if (XboxClient.LastTitleID != -1) // Couldn't find presence/device - could be offline or we set wrong deviceid...
+    else 
     {
-	    SteamClient.setPersona(SteamUser.EPersonaState.Offline);
-	    SteamClient.gamesPlayed();
+        m_DelayUpdate = true;
         
-        XboxClient.LastTitleID = -1;
-        console.log("[ STEAM ] No presence found, going offline...");
+        if (XboxClient.LastTitleID != -1) // Couldn't find presence/device - could be offline or we set wrong deviceid...
+        {
+            SteamClient.setPersona(SteamUser.EPersonaState.Offline);
+            SteamClient.gamesPlayed();
+            
+            XboxClient.LastTitleID = -1;
+            console.log("[ STEAM ] No presence found, going offline...");
+        }
     }
 
-    // We delay update by 1 more minute if title is same so we save some API requests...
-    setTimeout(OnUpdate, (m_IsSameTitleID ? Config.UpdateDelay + 1 : Config.UpdateDelay) * 60 * 1000);
+    setTimeout(OnUpdate, (m_DelayUpdate ? Config.UpdateDelay + 1 : Config.UpdateDelay) * 60 * 1000);
 }
 
 // Steam Client
