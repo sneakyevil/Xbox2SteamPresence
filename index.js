@@ -1,5 +1,7 @@
 const SteamUser = require("steam-user");
 const XboxWebAPI = require("xbox-webapi");
+const StringSimilarity = require("string-similarity");
+
 const Config = require("./config.json");
 const CustomTitles = require("./customtitles.json");
 
@@ -55,26 +57,16 @@ async function OnUpdate()
              // Attempt to find AppID by name...
             if (!m_HasCustomTitle)
             {
-                let m_NameMatchCount = 0;
-
+                let m_BestSimilarity = Config.GameNameSimilarity;
                 for (var i = 0; SteamClient.Apps.length > i; ++i)
                 {
                     let m_App = SteamClient.Apps[i];
-                    if (m_TitleName.indexOf(m_App.name) == -1)
+                    let m_AppNameSimilarity = StringSimilarity.compareTwoStrings(m_TitleName, m_App.name);
+                    if (m_BestSimilarity > m_AppNameSimilarity)
                         continue;
 
-                    // Check how many chars are matching...
-                    for (var c = 0; m_TitleName.length > c && m_App.name.length > c; ++c)
-                    {
-                        if (m_TitleName[c] != m_App.name[c])
-                            break;
-
-                        if (c > m_NameMatchCount)
-                        {
-                            m_AppID = m_App.appid;
-                            m_NameMatchCount = c;
-                        }
-                    }
+                    m_AppID = m_App.appid;
+                    m_BestSimilarity = m_AppNameSimilarity;
                 }
             }
 
@@ -162,10 +154,7 @@ XboxClient.RefreshToken = async function()
 {
     try
     {
-        let m_OAuth = await XboxClient._authentication.refreshToken(XboxClient._authentication._tokens.oauth.refresh_token);
-        XboxClient._authentication._tokens.oauth = m_OAuth;
-        XboxClient._authentication.saveTokens();
-
+        await XboxClient._authentication.refreshTokens("oauth");
         XboxClient.RefreshTokenFailNum = 0;
     }
     catch (error)

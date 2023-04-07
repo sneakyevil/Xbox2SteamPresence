@@ -11,5 +11,6 @@
         "clientSecret": "your_azure_client_secret",
         "deviceId": 0
     },
-    "UpdateDelay": 1
+    "UpdateDelay": 1,
+    "GameNameSimilarity": 0.9
 }
